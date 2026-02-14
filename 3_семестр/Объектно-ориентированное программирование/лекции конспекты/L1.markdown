@@ -1,0 +1,233 @@
+# Конспект: Объектно-ориентированное программирование (ООП)
+
+## Определение ООП
+ООП — метод программирования, при котором программа состоит из объектов, представляющих элементы реального мира. Объекты содержат данные и операции над ними. ООП смещает акцент с разработки алгоритмов на создание классов, которые можно использовать как стандартные типы данных.
+
+## Основные принципы ООП
+1. **Инкапсуляция**:
+   - Объединение данных и методов в одном объекте.
+   - Защита данных от внешнего вмешательства (например, через `private`/`protected`).
+   - Пример: методы `Set` и `Get` для доступа к полям класса.
+
+2. **Наследование**:
+   - Производный класс наследует свойства базового, добавляя свои уникальные характеристики.
+   - Позволяет избегать дублирования кода.
+   - Пример: класс `Driver` наследует от `Employee`.
+
+3. **Полиморфизм**:
+   - Одно действие (метод) имеет одинаковое имя для объектов в иерархии, но реализуется по-разному.
+   - Пример: метод `print()` в классах `Employee` и `Driver`.
+
+## Классы в C++
+
+- **Определение**: Классы — основа ООП в C++. Они содержат поля (данные) и методы (функции).
+- **Пример класса** (`Student`):
+
+```cpp
+class Student {
+private:
+    char* Fam;
+    char* Name;
+    int age;
+public:
+    void SetFam(char* NFam);
+    void SetName(char* NName);
+    void SetAge(int Nage);
+    char* GetFam(char* NFam);
+    char* GetName(char* NName);
+    int GetAge();
+};
+```
+
+- **Разделы класса**:
+  - `public`: доступ для любых функций.
+  - `private`: доступ только для методов класса и друзей.
+  - `protected`: доступ для методов класса и производных классов.
+- **Хороший стиль**:
+  - Данные в `private`/`protected`.
+  - Методы в `public`.
+  - Описание класса в `*.h`, реализация методов в `*.cpp`.
+
+## Реализация методов
+
+- **SetFam** (с учетом управления памятью):
+
+```cpp
+void Student::SetFam(char* NFam) {
+    if (strlen(NFam) > strlen(Fam)) {
+        delete Fam;
+        Fam = new char[strlen(NFam) + 1];
+    }
+    strcpy(Fam, NFam);
+}
+```
+
+- **GetFam** (безопасный доступ):
+
+```cpp
+char* Student::GetFam(char* NFam) {
+    strcpy(NFam, Fam);
+    return NFam;
+}
+```
+
+## Конструкторы и деструкторы
+
+- **Конструктор**:
+  - Вызывается при создании объекта, совпадает с именем класса, не имеет типа возврата.
+  - Используется для инициализации полей, особенно динамических.
+  - Пример:
+
+```cpp
+Employee::Employee() {
+    Name = new char[strlen("no name") + 1];
+    strcpy(Name, "no name");
+    // аналогично для Fam, Dep
+    Age = 0;
+}
+```
+
+  - Может быть с параметрами или по умолчанию.
+
+- **Деструктор**:
+  - Вызывается при уничтожении объекта, имя: `~ИмяКласса`.
+  - Освобождает динамическую память.
+  - Пример:
+
+```cpp
+Employee::~Employee() {
+    delete Name;
+    delete Fam;
+    delete Dep;
+}
+```
+
+## Наследование
+
+- **Пример**: Класс `Driver` наследует от `Employee`:
+
+```cpp
+class Driver : public Employee {
+public:
+    Driver(char* NName, char* NFam, char* NDep, int NAge, char* NCarNum, int NLen);
+    void print();
+protected:
+    int Len;
+    char* CarNum;
+};
+```
+
+- **Конструктор производного класса**:
+  - Вызывает конструктор базового класса через список инициализации:
+
+```cpp
+Driver::Driver(char* NName, char* NFam, char* NDep, int NAge, char* NCarNum, int NLen)
+    : Employee(NName, NFam, NDep, NAge) {
+    CarNum = new char[strlen(NCarNum) + 1];
+    strcpy(CarNum, NCarNum);
+    Len = NLen;
+}
+```
+
+## Множественное наследование
+
+- Класс может наследовать от нескольких базовых классов.
+- Пример:
+
+```cpp
+class computer : public computer_screen, public mother_board {
+public:
+    computer(char* name, int hard_disk, float floppy, char* screen, long colors, int x_res, int y_res, int processor, int speed, int RAM);
+private:
+    char name[64];
+    int hard_disk;
+    float floppy;
+};
+```
+
+- Конструктор вызывает конструкторы базовых классов:
+
+```cpp
+computer::computer(...) : computer_screen(screen, colors, x_res, y_res), mother_board(processor, speed, RAM) {
+    strcpy(name, name);
+    hard_disk = hard_disk;
+    floppy = floppy;
+}
+```
+
+## Друзья класса
+
+- **Friend**: класс или функция, имеющая доступ к `private`/`protected` данным.
+- Пример:
+
+```cpp
+class book {
+public:
+    book(char* title, char* author, char* catalog);
+    friend class librarian;
+private:
+    char title[64];
+    char author[64];
+    char catalog[64];
+};
+```
+
+- Ограничение друзей:
+
+```cpp
+class book {
+public:
+    friend char* librarian::get_catalog(book);
+    friend void librarian::change_catalog(book*, char*);
+};
+```
+
+## Перегрузка операторов
+
+- Позволяет переопределять стандартные операторы для пользовательских типов.
+- Пример для класса `Complex`:
+
+```cpp
+class Complex {
+private:
+    double re, im;
+public:
+    Complex(double aRe = 0, double anIm = 0) { re = aRe; im = anIm; }
+    Complex operator+(const Complex& c1);
+    friend ostream& operator<<(ostream&, Complex&);
+};
+```
+
+- **Пример перегрузки**:
+  - Префиксный инкремент:
+
+```cpp
+Complex Complex::operator++() {
+    re = re + 1;
+    return *this;
+}
+```
+
+  - Оператор вывода:
+
+```cpp
+ostream& operator<<(ostream& os, Complex& a) {
+    os << "(" << a.re << "," << a.im << ")" << endl;
+    return os;
+}
+```
+
+## Пример использования класса `Complex`
+
+```cpp
+Complex a, b, c;
+cout << "enter a" << endl;
+cin >> a;
+cout << "enter b" << endl;
+cin >> b;
+c = a + b;
+cout << "c=" << c << endl;
+```
+
+## Заключение
+ООП в C++ основано на классах, инкапсуляции, наследовании и полиморфизме. Классы содержат данные и методы, управляются через конструкторы/деструкторы, поддерживают перегрузку операторов и механизмы друзей для гибкого доступа. Наследование и множественное наследование позволяют создавать сложные иерархии классов, упрощая разработку.
